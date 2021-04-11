@@ -1,6 +1,6 @@
-# FinAPI (Versão Com Testes) - Desafios Principal 4 e Complementar 4A
+# FinAPI (Versão Com Testes) - Desafios Principal 4, Complementar 4A e Principal 5
 
-Desafio com o intuito de fixar a prática de testes unitários e de integração
+Desafio com o intuito de fixar a prática de testes unitários, de integração e desenvolvimento de funcionalidade com a aplicação de TDD
 
 ## Entidades
 
@@ -18,6 +18,7 @@ Desafio com o intuito de fixar a prática de testes unitários e de integração
 - [x] Deve ser possível realizar um depósito
 - [x] Deve ser possível realizar um saque
 - [x] Deve ser possível listar os dados de uma operação por ID
+- [x] Deve ser possível transferir dinheiro de uma conta para outra
 
 ## Regras de negócio
 
@@ -28,6 +29,8 @@ Desafio com o intuito de fixar a prática de testes unitários e de integração
 - [x] Não deve ser possível listar o saldo de um usuário que não existe
 - [x] Não deve ser possível listar uma operação de um usuário que não existe
 - [x] Não deve ser possível listar uma operação que não existe
+- [x] Não deve ser possível transferir se o valor for superior ao saldo da conta
+- [x] A lista de operações deve conter também as transferências (enviadas e recebidas)
 
 
 ## Recursos
