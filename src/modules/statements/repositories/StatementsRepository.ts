@@ -1,7 +1,7 @@
 import { getRepository, Repository } from "typeorm";
+import { ICreateStatementInRepositoryDTO } from "../dtos/ICreateStatementInRepositoryDTO";
 
 import { Statement } from "../entities/Statement";
-import { ICreateStatementDTO } from "../useCases/createStatement/ICreateStatementDTO";
 import { IGetBalanceDTO } from "../useCases/getBalance/IGetBalanceDTO";
 import { IGetStatementOperationDTO } from "../useCases/getStatementOperation/IGetStatementOperationDTO";
 import { IStatementsRepository } from "./IStatementsRepository";
@@ -17,13 +17,15 @@ export class StatementsRepository implements IStatementsRepository {
     user_id,
     amount,
     description,
-    type
-  }: ICreateStatementDTO): Promise<Statement> {
+    type,
+    sender_id
+  }: ICreateStatementInRepositoryDTO): Promise<Statement> {
     const statement = this.repository.create({
       user_id,
       amount,
       description,
-      type
+      type,
+      sender_id
     });
 
     return this.repository.save(statement);

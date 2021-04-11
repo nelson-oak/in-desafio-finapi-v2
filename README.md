@@ -30,6 +30,8 @@ Desafio com o intuito de fixar a prática de testes unitários, de integração 
 - [x] Não deve ser possível listar uma operação de um usuário que não existe
 - [x] Não deve ser possível listar uma operação que não existe
 - [x] Não deve ser possível transferir se o valor for superior ao saldo da conta
+- [x] Não deve ser possível transferir se o usuário que transferiu não existe
+- [x] Não deve ser possível transferir se o usuário que receberá a transferência não existe
 - [x] A lista de operações deve conter também as transferências (enviadas e recebidas)
 
 
