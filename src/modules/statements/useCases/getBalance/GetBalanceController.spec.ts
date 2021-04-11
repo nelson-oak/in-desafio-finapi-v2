@@ -13,7 +13,16 @@ const user = {
   hashedPassword: '',
 }
 
+const otherUser = {
+  id: uuidV4(),
+  email: 'nelson.2@nelsonoak.dev',
+  password: 'nelsonDevJs',
+  hashedPassword: '',
+}
+
 const statementIds = [
+  uuidV4(),
+  uuidV4(),
   uuidV4(),
   uuidV4()
 ]
@@ -32,13 +41,28 @@ describe('Get Balance', () => {
     `);
 
     await connection.query(`
+      INSERT INTO users(id, name, email, password, created_at, updated_at)
+      VALUES ('${otherUser.id}', 'Nelson Oak', '${otherUser.email}', '${otherUser.hashedPassword}', NOW(), NOW())
+    `);
+
+    await connection.query(`
       INSERT INTO statements(id, user_id, description, amount, type, created_at, updated_at)
-      VALUES ('${statementIds[0]}', '${user.id}', 'some deposit amount', 300, 'deposit', NOW(), NOW())
+      VALUES ('${statementIds[0]}', '${user.id}', 'some deposit amount', 400, 'deposit', NOW(), NOW())
     `);
 
     await connection.query(`
       INSERT INTO statements(id, user_id, description, amount, type, created_at, updated_at)
       VALUES ('${statementIds[1]}', '${user.id}', 'some withdraw amount', 100, 'withdraw', NOW(), NOW())
+    `);
+
+    await connection.query(`
+      INSERT INTO statements(id, user_id, sender_id, description, amount, type, created_at, updated_at)
+      VALUES ('${statementIds[2]}', '${otherUser.id}', '${user.id}', 'some transfer amount', 200, 'transfer', NOW(), NOW())
+    `);
+
+    await connection.query(`
+      INSERT INTO statements(id, user_id, sender_id, description, amount, type, created_at, updated_at)
+      VALUES ('${statementIds[3]}', '${user.id}', '${otherUser.id}', 'some transfer amount', 500, 'transfer', NOW(), NOW())
     `);
   })
 
@@ -64,8 +88,8 @@ describe('Get Balance', () => {
       })
 
     expect(response.status).toBe(200)
-    expect(response.body.statement.length).toBe(2)
-    expect(response.body.balance).toBe(200)
+    expect(response.body.statement.length).toBe(4)
+    expect(response.body.balance).toBe(600)
   })
 
   it('should not be able to get the balance with a false token', async () => {
