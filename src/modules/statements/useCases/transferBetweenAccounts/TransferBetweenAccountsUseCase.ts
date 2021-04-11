@@ -33,6 +33,10 @@ export class TransferBetweenAccountsUseCase {
       throw new TransferBetweenAccountsError.RecipientNotFound()
     }
 
+    if (sender_id === user_id) {
+      throw new TransferBetweenAccountsError.TransferRequiresDifferentUsers()
+    }
+
     const currentBalance = await this.statementsRepository.getUserBalance({
       user_id: sender_id,
       with_statement: false

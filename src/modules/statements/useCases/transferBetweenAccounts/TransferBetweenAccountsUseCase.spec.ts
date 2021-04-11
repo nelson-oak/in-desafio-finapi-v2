@@ -82,6 +82,23 @@ describe('Transfer Between Accounts', () => {
     ).rejects.toBeInstanceOf(TransferBetweenAccountsError.RecipientNotFound)
   })
 
+  it('should not be able to transfer if the recipient and sender are the same user', async () => {
+    const same_user = await inMemoryUsersRepository.create({
+      name: 'Nelson Carvalho',
+      email: 'nelson.carvalho@nelsonoak.dev',
+      password: 'NelsonCarvalho'
+    })
+
+    await expect(
+      transferBetweenAccountsUseCase.execute({
+        sender_id: String(same_user.id),
+        user_id: String(same_user.id),
+        description: 'A Transfer for Test',
+        amount: 800
+      })
+    ).rejects.toBeInstanceOf(TransferBetweenAccountsError.TransferRequiresDifferentUsers)
+  })
+
   it('should not be able to transfer if the amount is greater than balance of sender', async () => {
     const sender = await inMemoryUsersRepository.create({
       name: 'Nelson Carvalho',
