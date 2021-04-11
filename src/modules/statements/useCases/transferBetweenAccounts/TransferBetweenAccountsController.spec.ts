@@ -21,9 +21,8 @@ const otherUser = {
 }
 
 const statementId = uuidV4()
-const transferStatementId = uuidV4()
 
-describe('Get Balance', () => {
+describe('Transfer Between Accounts', () => {
   beforeAll(async () => {
     connection = await createConnection()
 
@@ -43,12 +42,7 @@ describe('Get Balance', () => {
 
     await connection.query(`
       INSERT INTO statements(id, user_id, description, amount, type, created_at, updated_at)
-      VALUES ('${statementId}', '${user.id}', 'some deposit amount', 300, 'deposit', NOW(), NOW())
-    `);
-
-    await connection.query(`
-      INSERT INTO statements(id, user_id, sender_id, description, amount, type, created_at, updated_at)
-      VALUES ('${transferStatementId}', '${otherUser.id}', '${user.id}', 'some deposit amount', 300, 'transfer', NOW(), NOW())
+      VALUES ('${statementId}', '${user.id}', 'some deposit amount', 500, 'deposit', NOW(), NOW())
     `);
   })
 
@@ -57,7 +51,7 @@ describe('Get Balance', () => {
     await connection.close()
   })
 
-  it('should be able to get an operation', async () => {
+  it('should be able to transfer an amount to an user', async () => {
     const responseToken = await request(app)
       .post('/api/v1/sessions')
       .send({
@@ -68,7 +62,11 @@ describe('Get Balance', () => {
     const { token } = responseToken.body;
 
     const response = await request(app)
-      .get(`/api/v1/statements/${statementId}`)
+      .post(`/api/v1/statements/transfer/${otherUser.id}`)
+      .send({
+        description: 'some transfer test',
+        amount: 100
+      })
       .set({
         Authorization: `Bearer ${token}`,
       })
@@ -77,28 +75,8 @@ describe('Get Balance', () => {
     expect(response.body).toHaveProperty('id')
   })
 
-  it('should be able to get a transfer sent operation', async () => {
-    const responseToken = await request(app)
-      .post('/api/v1/sessions')
-      .send({
-        email: user.email,
-        password: user.password
-      })
-
-    const { token } = responseToken.body;
-
-    const response = await request(app)
-      .get(`/api/v1/statements/${transferStatementId}`)
-      .set({
-        Authorization: `Bearer ${token}`,
-      })
-
-    expect(response.status).toBe(200)
-    expect(response.body).toHaveProperty('id')
-  })
-
-  it('should not be able to get a non-existing operation', async () => {
-    const nonExistingStatement = uuidV4()
+  it('should not be able to transfer to a non-existing user', async () => {
+    const nonExistingUser = uuidV4()
 
     const responseToken = await request(app)
       .post('/api/v1/sessions')
@@ -110,18 +88,77 @@ describe('Get Balance', () => {
     const { token } = responseToken.body;
 
     const response = await request(app)
-      .get(`/api/v1/statements/${nonExistingStatement}`)
+      .post(`/api/v1/statements/transfer/${nonExistingUser}`)
+      .send({
+        description: 'some transfer test',
+        amount: 100
+      })
       .set({
         Authorization: `Bearer ${token}`,
       })
 
     expect(response.status).toBe(404)
-    expect(response.body.message).toEqual('Statement not found')
+
+    expect(response.body.message).toEqual("Recipient user not found!")
   })
 
-  it('should not be able to get an operation with a false token', async () => {
+  it('should not be able to transfer if the recipient is the same as the user', async () => {
+    const responseToken = await request(app)
+      .post('/api/v1/sessions')
+      .send({
+        email: user.email,
+        password: user.password
+      })
+
+    const { token } = responseToken.body;
+
     const response = await request(app)
-      .get(`/api/v1/statements/${statementId}`)
+      .post(`/api/v1/statements/transfer/${user.id}`)
+      .send({
+        description: 'some transfer test',
+        amount: 100
+      })
+      .set({
+        Authorization: `Bearer ${token}`,
+      })
+
+    expect(response.status).toBe(400)
+
+    expect(response.body.message).toEqual("Sender and recipient can not be the same user!")
+  })
+
+  it('should not be able to transfer if the amount is greater than balance', async () => {
+    const responseToken = await request(app)
+      .post('/api/v1/sessions')
+      .send({
+        email: user.email,
+        password: user.password
+      })
+
+    const { token } = responseToken.body;
+
+    const response = await request(app)
+      .post(`/api/v1/statements/transfer/${otherUser.id}`)
+      .send({
+        description: 'some transfer test',
+        amount: 600
+      })
+      .set({
+        Authorization: `Bearer ${token}`,
+      })
+
+    expect(response.status).toBe(400)
+
+    expect(response.body.message).toEqual("Insufficient funds for a transfer!")
+  })
+
+  it('should not be able to transfer with a false token', async () => {
+    const response = await request(app)
+      .post(`/api/v1/statements/transfer/${otherUser.id}`)
+      .send({
+        description: 'some transfer test',
+        amount: 100
+      })
       .set({
         Authorization: `Bearer false-token`,
       })
@@ -131,9 +168,13 @@ describe('Get Balance', () => {
     expect(response.body.message).toEqual("JWT invalid token!")
   })
 
-  it('should not be able to get an operation without a token', async () => {
+  it('should not be able to transfer without a token', async () => {
     const response = await request(app)
-      .get(`/api/v1/statements/${statementId}`)
+      .post(`/api/v1/statements/transfer/${otherUser.id}`)
+      .send({
+        description: 'some transfer test',
+        amount: 100
+      })
 
     expect(response.status).toBe(401)
 

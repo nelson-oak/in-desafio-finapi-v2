@@ -57,7 +57,7 @@ describe('Create Statement', () => {
     expect(statement).toHaveProperty('id')
   })
 
-  it('should be not be able to withdraw if the amount is greater than balance', async () => {
+  it('should not be able to withdraw if the amount is greater than balance', async () => {
     const user = await inMemoryUsersRepository.create({
       name: 'Nelson Oak',
       email: 'nelson@nelsonoak.dev',
@@ -81,7 +81,7 @@ describe('Create Statement', () => {
     ).rejects.toBeInstanceOf(CreateStatementError.InsufficientFunds)
   })
 
-  it('should be not be able to create a statement for a non-existing user', async () => {
+  it('should not be able to create a statement for a non-existing user', async () => {
     await expect(
       createStatementUseCase.execute({
         user_id: 'non-existing-user',

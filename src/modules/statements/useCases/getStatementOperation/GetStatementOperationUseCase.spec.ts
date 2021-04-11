@@ -37,7 +37,7 @@ describe('Get Statement Operation', () => {
     expect(statementById).toMatchObject(statement)
   })
 
-  it('should be able to get a transfer sent', async () => {
+  it('should be able to get a transfer sent by ID', async () => {
     const user = await inMemoryUsersRepository.create({
       name: 'Nelson Oak',
       email: 'nelson@nelsonoak.dev',
