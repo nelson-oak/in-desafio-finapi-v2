@@ -37,6 +37,29 @@ describe('Get Statement Operation', () => {
     expect(statementById).toMatchObject(statement)
   })
 
+  it('should be able to get a transfer sent', async () => {
+    const user = await inMemoryUsersRepository.create({
+      name: 'Nelson Oak',
+      email: 'nelson@nelsonoak.dev',
+      password: 'nelsonDevJS'
+    })
+
+    const statement = await inMemoryStatementsRepository.create({
+      user_id: 'some-user-id',
+      sender_id: user.id as string,
+      description: 'some amount deposit',
+      amount: 500,
+      type: OperationType.TRANSFER
+    })
+
+    const statementById = await getStatementOperationUseCase.execute({
+      statement_id: statement.id as string,
+      user_id: user.id as string,
+    })
+
+    expect(statementById).toMatchObject(statement)
+  })
+
   it('should not be able to get a statement of a non-existing user', async () => {
     const user = await inMemoryUsersRepository.create({
       name: 'Nelson Oak',

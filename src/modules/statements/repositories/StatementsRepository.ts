@@ -32,8 +32,17 @@ export class StatementsRepository implements IStatementsRepository {
   }
 
   async findStatementOperation({ statement_id, user_id }: IGetStatementOperationDTO): Promise<Statement | undefined> {
-    return this.repository.findOne(statement_id, {
-      where: { user_id }
+    return this.repository.findOne({
+      where: [
+        {
+          id: statement_id,
+          user_id
+        },
+        {
+          id: statement_id,
+          sender_id: user_id
+        },
+      ],
     });
   }
 

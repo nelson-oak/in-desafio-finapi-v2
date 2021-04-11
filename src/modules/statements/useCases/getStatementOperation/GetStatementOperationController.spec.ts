@@ -13,7 +13,15 @@ const user = {
   hashedPassword: '',
 }
 
+const otherUser = {
+  id: uuidV4(),
+  email: 'nelson.2@nelsonoak.dev',
+  password: 'nelsonDevJs',
+  hashedPassword: '',
+}
+
 const statementId = uuidV4()
+const transferStatementId = uuidV4()
 
 describe('Get Balance', () => {
   beforeAll(async () => {
@@ -29,8 +37,18 @@ describe('Get Balance', () => {
     `);
 
     await connection.query(`
+      INSERT INTO users(id, name, email, password, created_at, updated_at)
+      VALUES ('${otherUser.id}', 'Nelson Oak', '${otherUser.email}', '${otherUser.hashedPassword}', NOW(), NOW())
+    `);
+
+    await connection.query(`
       INSERT INTO statements(id, user_id, description, amount, type, created_at, updated_at)
       VALUES ('${statementId}', '${user.id}', 'some deposit amount', 300, 'deposit', NOW(), NOW())
+    `);
+
+    await connection.query(`
+      INSERT INTO statements(id, user_id, sender_id, description, amount, type, created_at, updated_at)
+      VALUES ('${transferStatementId}', '${otherUser.id}', '${user.id}', 'some deposit amount', 300, 'transfer', NOW(), NOW())
     `);
   })
 
@@ -51,6 +69,26 @@ describe('Get Balance', () => {
 
     const response = await request(app)
       .get(`/api/v1/statements/${statementId}`)
+      .set({
+        Authorization: `Bearer ${token}`,
+      })
+
+    expect(response.status).toBe(200)
+    expect(response.body).toHaveProperty('id')
+  })
+
+  it('should be able to get an transfer sent operation', async () => {
+    const responseToken = await request(app)
+      .post('/api/v1/sessions')
+      .send({
+        email: user.email,
+        password: user.password
+      })
+
+    const { token } = responseToken.body;
+
+    const response = await request(app)
+      .get(`/api/v1/statements/${transferStatementId}`)
       .set({
         Authorization: `Bearer ${token}`,
       })
