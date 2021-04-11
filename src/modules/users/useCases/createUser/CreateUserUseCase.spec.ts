@@ -22,18 +22,18 @@ describe('Create User', () => {
   })
 
   it('should not be able to create a user with an email from another', async () => {
-    expect(async () => {
       await createUsersUseCase.execute({
         name: 'Nelson Oak',
         email: 'nelson@nelsonoak.dev',
         password: 'nelsonDevJS'
       })
 
-      await createUsersUseCase.execute({
+    await expect(
+      createUsersUseCase.execute({
         name: 'Another Nelson Oak',
         email: 'nelson@nelsonoak.dev',
         password: 'anotherNelsonDevJS'
       })
-    }).rejects.toBeInstanceOf(CreateUserError)
+    ).rejects.toBeInstanceOf(CreateUserError)
   })
 })

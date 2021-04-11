@@ -1,3 +1,4 @@
+import { OperationType } from "../../entities/Statement";
 import { InMemoryUsersRepository } from "../../../users/repositories/in-memory/InMemoryUsersRepository";
 import { InMemoryStatementsRepository } from "../../repositories/in-memory/InMemoryStatementsRepository";
 import { GetBalanceError } from "./GetBalanceError";
@@ -6,11 +7,6 @@ import { GetBalanceUseCase } from "./GetBalanceUseCase";
 let inMemoryStatementsRepository: InMemoryStatementsRepository
 let inMemoryUsersRepository: InMemoryUsersRepository
 let getBalanceUseCase: GetBalanceUseCase
-
-enum OperationType {
-  DEPOSIT = 'deposit',
-  WITHDRAW = 'withdraw',
-}
 
 describe('Get Balance', () => {
   beforeEach(() => {
@@ -49,10 +45,10 @@ describe('Get Balance', () => {
   })
 
   it('should be not be able to list the balance of a non-existing user', async () => {
-    expect(async () => {
-      await getBalanceUseCase.execute({
+    await expect(
+      getBalanceUseCase.execute({
         user_id: 'non-existing-user'
       })
-    }).rejects.toBeInstanceOf(GetBalanceError)
+    ).rejects.toBeInstanceOf(GetBalanceError)
   })
 })
